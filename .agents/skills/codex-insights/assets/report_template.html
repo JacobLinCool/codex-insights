@@ -1,0 +1,1969 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Codex Insights Report</title>
+  <style>
+    :root {
+      --bg: #0b0d11;
+      --bg-2: #11151b;
+      --panel: #131820;
+      --panel-2: #0f1319;
+      --line: #242c38;
+      --line-soft: #1c2330;
+      --ink: #edf3fb;
+      --muted: #93a2b8;
+      --accent: #5c8dff;
+      --accent-soft: #7aa5ff;
+      --danger: #ff5c67;
+      --danger-soft: #ff7a85;
+      --ok: #2ad17f;
+      --radius: 14px;
+      --shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      color: var(--ink);
+      background: radial-gradient(circle at 20% -10%, #1a202b 0%, var(--bg) 44%, #080a0d 100%);
+      font-family: "SF Pro Display", "Inter", "IBM Plex Sans", "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(120deg, rgba(92, 141, 255, 0.05), rgba(42, 209, 127, 0.03) 38%, transparent 66%);
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 26px 20px 44px;
+    }
+
+    .hero {
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(19, 24, 32, 0.98), rgba(15, 19, 25, 0.98));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      margin: 0 0 9px;
+      font-size: 30px;
+      font-weight: 680;
+      letter-spacing: 0.01em;
+    }
+
+    .meta {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .meta-note {
+      margin-top: 4px;
+      color: #8aa0bc;
+      font-size: 12px;
+    }
+
+    .time-filter {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .time-filter-label {
+      font-size: 12px;
+      color: #95aac5;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .time-filter-shortcuts {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #111823;
+    }
+
+    .time-chip {
+      border: 0;
+      background: transparent;
+      color: #9eb0c9;
+      font-size: 12px;
+      line-height: 1;
+      padding: 7px 10px;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .time-chip:hover {
+      background: #162233;
+      color: #d8e6f8;
+    }
+
+    .time-chip.active {
+      background: #23334a;
+      color: #ecf3fb;
+    }
+
+    .time-filter input[type="date"] {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 6px 10px;
+      background: #121823;
+      color: #dbe6f5;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .time-filter input[type="date"]:focus {
+      border-color: #3a4a63;
+      box-shadow: 0 0 0 2px rgba(92, 141, 255, 0.15);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(162px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .metric {
+      border: 1px solid var(--line-soft);
+      border-radius: 12px;
+      background: linear-gradient(150deg, #141a23, #10151d);
+      padding: 10px 12px;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 7px;
+      font-weight: 600;
+    }
+
+    .metric-value {
+      font-size: 21px;
+      font-weight: 700;
+      color: #f5f9ff;
+      letter-spacing: 0.01em;
+    }
+
+    .section {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(150deg, #131a24, #0f141c);
+      box-shadow: var(--shadow);
+      margin: 0 0 12px;
+      padding: 15px 16px 13px;
+    }
+
+    .section h2 {
+      margin: 0 0 8px;
+      font-size: 19px;
+      letter-spacing: 0.01em;
+      font-weight: 650;
+      color: #f0f5fe;
+    }
+
+    .section p {
+      margin: 0 0 8px;
+      color: #c5d1e2;
+      font-size: 14px;
+    }
+
+    .section ul {
+      margin: 8px 0 0 20px;
+      padding: 0;
+      color: #cfd9e7;
+    }
+
+    .section li {
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .chart-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(150deg, #131a24, #0f141c);
+      box-shadow: var(--shadow);
+      margin: 0 0 12px;
+      padding: 14px 16px;
+      overflow: hidden;
+    }
+
+    .chart-title {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: #9eb0c9;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+
+    .chart-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chart-head .chart-title {
+      margin: 0;
+    }
+
+    .view-toggle {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #111823;
+    }
+
+    .view-btn {
+      border: 0;
+      background: transparent;
+      color: #9eb0c9;
+      font-size: 12px;
+      line-height: 1;
+      padding: 7px 10px;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .view-btn:hover {
+      background: #162233;
+      color: #d8e6f8;
+    }
+
+    .view-btn.active {
+      background: #23334a;
+      color: #ecf3fb;
+    }
+
+    .chart {
+      width: 100%;
+      height: 270px;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .chart-small {
+      width: 100%;
+      height: 256px;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .chart-note {
+      margin-top: 8px;
+      font-size: 15px;
+      color: #acc0da;
+      font-weight: 500;
+    }
+
+    .multi-stats {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin: 10px 0 8px;
+    }
+
+    .multi-stat {
+      min-width: 138px;
+    }
+
+    .multi-value {
+      font-size: 46px;
+      color: var(--accent-soft);
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .multi-label {
+      font-size: 12px;
+      color: #95aac5;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    .multi-desc {
+      font-size: 17px;
+      color: #c1cfe2;
+      margin: 10px 0 2px;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .timezone-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 10px;
+    }
+
+    .timezone-row label {
+      font-size: 12px;
+      color: #95aac5;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .timezone-row select,
+    .timezone-row input {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 6px 10px;
+      background: #121823;
+      color: #dbe6f5;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .timezone-row select:focus,
+    .timezone-row input:focus {
+      border-color: #3a4a63;
+      box-shadow: 0 0 0 2px rgba(92, 141, 255, 0.15);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 11px;
+      margin-top: 12px;
+    }
+
+    .details-panel {
+      margin: 0 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(150deg, #131a24, #0f141c);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .details-panel > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 12px 16px;
+      color: #cfe0f4;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      border-bottom: 1px solid transparent;
+      user-select: none;
+    }
+
+    .details-panel > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .details-panel[open] > summary {
+      border-bottom-color: var(--line);
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .details-content {
+      padding: 0 12px 12px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: linear-gradient(150deg, #131a24, #0f141c);
+      box-shadow: var(--shadow);
+      padding: 13px;
+    }
+
+    .card.span-full {
+      grid-column: 1 / -1;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      color: #dce7f5;
+      letter-spacing: 0.01em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 7px 8px;
+      border-bottom: 1px solid #202735;
+      vertical-align: top;
+    }
+
+    th {
+      color: #94a8c2;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    td {
+      color: #d3dff0;
+    }
+
+    td.num, th.num { text-align: right; }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .footer {
+      margin-top: 16px;
+      border: 1px dashed #2d3644;
+      border-radius: 12px;
+      padding: 11px;
+      background: linear-gradient(150deg, #121821, #0f141c);
+      color: #879ab3;
+      font-size: 12px;
+    }
+
+    @media (max-width: 980px) {
+      .chart-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .hero h1 { font-size: 25px; }
+      .wrap { padding: 16px 12px 30px; }
+      .multi-value { font-size: 38px; }
+      .multi-desc { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>Codex Insights</h1>
+      <p class="meta">Generated at: {{GENERATED_AT}}</p>
+      <p class="meta">Window: {{TIME_RANGE_START}}</p>
+      <p class="meta meta-note">Narrative sections remain full-window; KPI/charts follow selected date range (UTC).</p>
+      <div class="time-filter">
+        <span class="time-filter-label">Date Range (UTC)</span>
+        <div class="time-filter-shortcuts">
+          <button id="range-chip-7d" class="time-chip" type="button">7D</button>
+          <button id="range-chip-30d" class="time-chip active" type="button">30D</button>
+          <button id="range-chip-90d" class="time-chip" type="button">90D</button>
+          <button id="range-chip-all" class="time-chip" type="button">All</button>
+        </div>
+        <input id="date-start" type="date" />
+        <span class="meta">to</span>
+        <input id="date-end" type="date" />
+      </div>
+      <section class="metrics">{{METRIC_CARDS}}</section>
+    </header>
+
+    <section class="chart-card">
+      <h3 class="chart-title">Daily Activity Trend (UTC)</h3>
+      <div id="daily-activity-chart" class="chart"></div>
+      <p id="daily-activity-summary" class="chart-note"></p>
+    </section>
+
+    <section class="chart-card">
+      <h3 class="chart-title">Model Usage Trend (Sessions / Day)</h3>
+      <div id="model-usage-chart" class="chart"></div>
+      <p id="model-usage-summary" class="chart-note"></p>
+    </section>
+
+    <section class="chart-card">
+      <div class="chart-head">
+        <h3 class="chart-title">Model Outcome Composition</h3>
+        <div class="view-toggle" aria-label="Model outcome view switch">
+          <button id="model-outcome-view-ratio" class="view-btn active" type="button">Ratio %</button>
+          <button id="model-outcome-view-count" class="view-btn" type="button">Count</button>
+        </div>
+      </div>
+      <div id="model-outcome-matrix-chart" class="chart"></div>
+      <p id="model-outcome-summary" class="chart-note"></p>
+    </section>
+
+    <section class="chart-card">
+      <h3 class="chart-title">User Response Time Distribution</h3>
+      <div id="response-time-chart" class="chart"></div>
+      <p id="response-time-summary" class="chart-note"></p>
+    </section>
+
+    <section class="chart-card">
+      <h3 class="chart-title">Archive Latency Distribution</h3>
+      <div id="archive-latency-chart" class="chart"></div>
+      <p id="archive-latency-note" class="chart-note"></p>
+    </section>
+
+    <section class="chart-card">
+      <h3 class="chart-title">Concurrency Quality</h3>
+      <div class="multi-stats">
+        <div class="multi-stat">
+          <div id="concurrency-max" class="multi-value">0</div>
+          <div class="multi-label">Max Concurrent Sessions</div>
+        </div>
+        <div class="multi-stat">
+          <div id="concurrency-overlap-minutes" class="multi-value">0</div>
+          <div class="multi-label">Overlap Minutes</div>
+        </div>
+        <div class="multi-stat">
+          <div id="concurrency-message-share" class="multi-value">0%</div>
+          <div class="multi-label">Message Share</div>
+        </div>
+      </div>
+      <p id="concurrency-description" class="multi-desc"></p>
+    </section>
+
+    <section class="chart-grid">
+      <section class="chart-card">
+        <h3 class="chart-title">User Messages By Time Of Day</h3>
+        <div class="timezone-row">
+          <label for="timezone-select">Timezone</label>
+          <select id="timezone-select">
+            <option value="-8">PT (UTC-8)</option>
+            <option value="-5">ET (UTC-5)</option>
+            <option value="0">UTC</option>
+            <option value="1">CET (UTC+1)</option>
+            <option value="9">JST (UTC+9)</option>
+            <option value="custom">Custom...</option>
+          </select>
+          <input id="custom-timezone-offset" type="number" step="1" min="-12" max="14" style="display:none" placeholder="UTC" />
+        </div>
+        <div id="time-of-day-chart" class="chart-small"></div>
+      </section>
+
+      <section class="chart-card">
+        <h3 class="chart-title">Tool Errors Encountered</h3>
+        <div id="tool-errors-chart" class="chart-small"></div>
+      </section>
+    </section>
+
+    <section class="chart-grid">
+      <section class="chart-card">
+        <h3 class="chart-title">Project Context Switching (Daily)</h3>
+        <div id="project-switch-daily-chart" class="chart-small"></div>
+      </section>
+
+      <section class="chart-card">
+        <h3 class="chart-title">Outcome By Switching Intensity</h3>
+        <div id="project-switch-outcome-chart" class="chart-small"></div>
+      </section>
+    </section>
+
+    <section class="chart-grid">
+      <section class="chart-card">
+        <h3 class="chart-title">Session Sources</h3>
+        <div id="source-chart" class="chart-small"></div>
+      </section>
+
+      <section class="chart-card">
+        <h3 class="chart-title">Sandbox Types</h3>
+        <div id="sandbox-chart" class="chart-small"></div>
+      </section>
+    </section>
+
+    <section class="chart-grid">
+      <section class="chart-card">
+        <h3 class="chart-title">Approval Modes</h3>
+        <div id="approval-chart" class="chart-small"></div>
+      </section>
+
+      <section class="chart-card">
+        <h3 class="chart-title">CLI Major.Minor Distribution</h3>
+        <div id="cli-version-chart" class="chart-small"></div>
+      </section>
+    </section>
+
+    <details class="details-panel">
+      <summary>Details: Distribution Tables</summary>
+      <div class="details-content">
+        <section class="grid">
+          {{TOP_TOOLS_TABLE}}
+          {{OUTCOME_TABLE}}
+          {{FRICTION_TABLE}}
+          {{SATISFACTION_TABLE}}
+          {{TOOL_ERROR_TABLE}}
+          {{SQLITE_DIAGNOSTICS_TABLES}}
+        </section>
+      </div>
+    </details>
+
+    {{AT_A_GLANCE}}
+    {{WHAT_YOU_WORK_ON}}
+    {{HOW_YOU_USE_CODEX}}
+    {{WINS}}
+    {{FRICTION}}
+    {{FEATURE_SUGGESTIONS}}
+    {{PATTERNS}}
+    {{HORIZON}}
+
+    <div class="footer">
+      This report is generated from validated SessionMetaV1, FacetV1, and StatsV1 artifacts.
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script>
+    const baseData = {{CHART_DATA_JSON}};
+    let chartData = baseData;
+
+    const responseChart = echarts.init(document.getElementById('response-time-chart'));
+    const archiveLatencyChart = echarts.init(document.getElementById('archive-latency-chart'));
+    const dailyActivityChart = echarts.init(document.getElementById('daily-activity-chart'));
+    const modelUsageChart = echarts.init(document.getElementById('model-usage-chart'));
+    const modelOutcomeMatrixChart = echarts.init(document.getElementById('model-outcome-matrix-chart'));
+    const timeOfDayChart = echarts.init(document.getElementById('time-of-day-chart'));
+    const toolErrorsChart = echarts.init(document.getElementById('tool-errors-chart'));
+    const projectSwitchDailyChart = echarts.init(document.getElementById('project-switch-daily-chart'));
+    const projectSwitchOutcomeChart = echarts.init(document.getElementById('project-switch-outcome-chart'));
+    const sourceChart = echarts.init(document.getElementById('source-chart'));
+    const sandboxChart = echarts.init(document.getElementById('sandbox-chart'));
+    const approvalChart = echarts.init(document.getElementById('approval-chart'));
+    const cliVersionChart = echarts.init(document.getElementById('cli-version-chart'));
+    let modelOutcomeViewMode = 'ratio';
+
+    function toOneDecimal(value) {
+      return Number(value || 0).toFixed(1).replace(/\.0$/, '');
+    }
+
+    function formatCompactInt(value) {
+      const n = Number(value || 0);
+      const abs = Math.abs(n);
+      if (abs >= 1000000000000) {
+        return `${(n / 1000000000000).toFixed(1)}T`;
+      }
+      if (abs >= 1000000000) {
+        return `${(n / 1000000000).toFixed(1)}B`;
+      }
+      if (abs >= 1000000) {
+        return `${(n / 1000000).toFixed(1)}M`;
+      }
+      if (abs >= 1000) {
+        return `${(n / 1000).toFixed(1)}K`;
+      }
+      return `${Math.round(n)}`;
+    }
+
+    const RESPONSE_BUCKET_ORDER = ['<2s', '2-10s', '10-30s', '30s-1m', '1-2m', '2-5m', '5-15m', '>15m'];
+    const ARCHIVE_BUCKET_ORDER = ['<10m', '10-30m', '30-60m', '1-6h', '6-24h', '1-3d', '>3d'];
+    const OUTCOME_FOCUS = ['fully_achieved', 'mostly_achieved', 'not_achieved'];
+    const SWITCH_BUCKETS = [
+      { key: 'none_0', label: '0' },
+      { key: 'low_1_2', label: '1-2' },
+      { key: 'medium_3_5', label: '3-5' },
+      { key: 'high_6_plus', label: '6+' },
+    ];
+
+    function sortedCounterItems(counter, limit = 12) {
+      if (!counter || typeof counter !== 'object') return [];
+      return Object.entries(counter)
+        .filter(([key, value]) => typeof key === 'string' && Number.isFinite(Number(value)))
+        .map(([key, value]) => ({ label: key, count: Number(value || 0) }))
+        .sort((a, b) => (b.count - a.count) || a.label.localeCompare(b.label))
+        .slice(0, limit);
+    }
+
+    function parseIsoToMillis(value) {
+      if (typeof value !== 'string' || !value) return null;
+      const t = Date.parse(value);
+      return Number.isFinite(t) ? t : null;
+    }
+
+    function dayKeyFromIso(value) {
+      if (typeof value !== 'string' || value.length < 10) return '';
+      return value.slice(0, 10);
+    }
+
+    function shiftDay(dayKey, days) {
+      const ts = Date.parse(`${dayKey}T00:00:00Z`);
+      if (!Number.isFinite(ts)) return dayKey;
+      const shifted = new Date(ts + days * 86400000);
+      return shifted.toISOString().slice(0, 10);
+    }
+
+    function contextSwitchBucket(switchEvents) {
+      const n = Number(switchEvents || 0);
+      if (n <= 0) return 'none_0';
+      if (n <= 2) return 'low_1_2';
+      if (n <= 5) return 'medium_3_5';
+      return 'high_6_plus';
+    }
+
+    function archiveLatencyBucket(hours) {
+      const h = Number(hours || 0);
+      const m = h * 60;
+      if (m < 10) return '<10m';
+      if (m < 30) return '10-30m';
+      if (m < 60) return '30-60m';
+      if (h < 6) return '1-6h';
+      if (h < 24) return '6-24h';
+      if (h < 72) return '1-3d';
+      return '>3d';
+    }
+
+    function buildFilteredView(startDay, endDay) {
+      const rollups = Array.isArray(baseData.session_rollups) ? baseData.session_rollups : [];
+      const filtered = rollups.filter((row) => {
+        if (!row || typeof row !== 'object') return false;
+        const day = typeof row.day_utc === 'string' && row.day_utc ? row.day_utc : dayKeyFromIso(String(row.start_time || ''));
+        if (!day) return false;
+        if (startDay && day < startDay) return false;
+        if (endDay && day > endDay) return false;
+        return true;
+      });
+
+      const responseCounter = {};
+      const toolErrorCounter = {};
+      const messageHourCounter = {};
+      const sourceCounter = {};
+      const approvalCounter = {};
+      const sandboxCounter = {};
+      const cliCounter = {};
+      const dailyMap = {};
+      const modelDailyMap = {};
+      const modelOutcomeCounter = {};
+      const modelSessionCounter = {};
+      const dayRowsMap = {};
+      const archivedLatencyHours = [];
+
+      let userMessages = 0;
+      let assistantMessages = 0;
+      let toolCalls = 0;
+      let toolErrors = 0;
+      let inputTokens = 0;
+      let outputTokens = 0;
+      let cachedInputTokens = 0;
+      let sessionsFaceted = 0;
+      let archivedSessions = 0;
+      let activeSessions = 0;
+
+      const intervals = [];
+
+      for (const row of filtered) {
+        const day = typeof row.day_utc === 'string' && row.day_utc ? row.day_utc : dayKeyFromIso(String(row.start_time || ''));
+        if (!day) continue;
+
+        const userMsg = Number(row.user_messages || 0);
+        const assistantMsg = Number(row.assistant_messages || 0);
+        const msgTotal = Number(row.messages_total || (userMsg + assistantMsg));
+        const callCount = Number(row.tool_calls || 0);
+        const errorCount = Number(row.tool_errors || 0);
+        const inTok = Number(row.input_tokens || 0);
+        const outTok = Number(row.output_tokens || 0);
+        const cacheTok = Number(row.cached_input_tokens || 0);
+
+        userMessages += userMsg;
+        assistantMessages += assistantMsg;
+        toolCalls += callCount;
+        toolErrors += errorCount;
+        inputTokens += inTok;
+        outputTokens += outTok;
+        cachedInputTokens += cacheTok;
+
+        const startMs = parseIsoToMillis(String(row.start_time || ''));
+        const endMs = parseIsoToMillis(String(row.end_time || ''));
+        if (startMs !== null && endMs !== null && endMs >= startMs) {
+          intervals.push({
+            session_id: String(row.session_id || ''),
+            start_ms: startMs,
+            end_ms: endMs,
+            messages_total: msgTotal,
+          });
+        }
+
+        if (!dailyMap[day]) {
+          dailyMap[day] = { date: day, sessions: 0, messages: 0, tool_errors: 0 };
+        }
+        dailyMap[day].sessions += 1;
+        dailyMap[day].messages += msgTotal;
+        dailyMap[day].tool_errors += errorCount;
+
+        const model = (typeof row.primary_model === 'string' && row.primary_model) ? row.primary_model : '<unknown>';
+        if (!modelDailyMap[day]) modelDailyMap[day] = {};
+        modelDailyMap[day][model] = (modelDailyMap[day][model] || 0) + 1;
+
+        if (row.facet_present && typeof row.outcome === 'string' && row.outcome) {
+          sessionsFaceted += 1;
+          modelSessionCounter[model] = (modelSessionCounter[model] || 0) + 1;
+          if (!modelOutcomeCounter[model]) modelOutcomeCounter[model] = {};
+          modelOutcomeCounter[model][row.outcome] = (modelOutcomeCounter[model][row.outcome] || 0) + 1;
+        }
+
+        const responseBuckets = row.response_time_buckets && typeof row.response_time_buckets === 'object'
+          ? row.response_time_buckets
+          : {};
+        for (const [label, count] of Object.entries(responseBuckets)) {
+          responseCounter[label] = (responseCounter[label] || 0) + Number(count || 0);
+        }
+
+        const errCats = row.tool_error_categories && typeof row.tool_error_categories === 'object'
+          ? row.tool_error_categories
+          : {};
+        for (const [label, count] of Object.entries(errCats)) {
+          toolErrorCounter[label] = (toolErrorCounter[label] || 0) + Number(count || 0);
+        }
+
+        const msgHours = row.message_hours_utc && typeof row.message_hours_utc === 'object'
+          ? row.message_hours_utc
+          : {};
+        for (const [hour, count] of Object.entries(msgHours)) {
+          messageHourCounter[hour] = (messageHourCounter[hour] || 0) + Number(count || 0);
+        }
+
+        const source = (typeof row.source === 'string' && row.source) ? row.source : '<unknown>';
+        sourceCounter[source] = (sourceCounter[source] || 0) + 1;
+        const approval = (typeof row.approval_mode === 'string' && row.approval_mode) ? row.approval_mode : '<unknown>';
+        approvalCounter[approval] = (approvalCounter[approval] || 0) + 1;
+        const sandbox = (typeof row.sandbox_type === 'string' && row.sandbox_type) ? row.sandbox_type : '<unknown>';
+        sandboxCounter[sandbox] = (sandboxCounter[sandbox] || 0) + 1;
+        const cli = (typeof row.cli_version_major_minor === 'string' && row.cli_version_major_minor) ? row.cli_version_major_minor : '<unknown>';
+        cliCounter[cli] = (cliCounter[cli] || 0) + 1;
+
+        if (row.archived === true) archivedSessions += 1;
+        if (row.archived === false) activeSessions += 1;
+        if (typeof row.archive_latency_hours === 'number' && row.archive_latency_hours >= 0) {
+          archivedLatencyHours.push(Number(row.archive_latency_hours));
+        }
+
+        if (!dayRowsMap[day]) dayRowsMap[day] = [];
+        dayRowsMap[day].push({
+          start_ms: startMs ?? 0,
+          session_id: String(row.session_id || ''),
+          project: (typeof row.project_label === 'string' && row.project_label) ? row.project_label : '<unknown>',
+          outcome: (typeof row.outcome === 'string' && row.outcome) ? row.outcome : null,
+        });
+      }
+
+      const responseItems = RESPONSE_BUCKET_ORDER
+        .map((label) => ({ label, count: Number(responseCounter[label] || 0) }))
+        .filter((row) => row.count > 0);
+      const responseCount = responseItems.reduce((sum, row) => sum + row.count, 0);
+
+      const archiveCounter = {};
+      for (const hours of archivedLatencyHours) {
+        const label = archiveLatencyBucket(hours);
+        archiveCounter[label] = (archiveCounter[label] || 0) + 1;
+      }
+      const archiveItems = ARCHIVE_BUCKET_ORDER
+        .map((label) => ({ label, count: Number(archiveCounter[label] || 0) }))
+        .filter((row) => row.count > 0);
+
+      const dailyRows = Object.values(dailyMap).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+      const modelDays = Object.keys(modelDailyMap).sort((a, b) => a.localeCompare(b));
+      const modelNames = Array.from(
+        new Set(modelDays.flatMap((day) => Object.keys(modelDailyMap[day] || {})))
+      ).sort((a, b) => a.localeCompare(b));
+      const modelSeries = modelNames.map((model) => ({
+        model,
+        values: modelDays.map((day) => Number((modelDailyMap[day] || {})[model] || 0)),
+      }));
+
+      const modelOutcomeRows = Object.entries(modelSessionCounter)
+        .map(([model, sessions]) => {
+          const counts = modelOutcomeCounter[model] || {};
+          const ratiosPercent = {};
+          for (const outcome of OUTCOME_FOCUS) {
+            ratiosPercent[outcome] = sessions > 0 ? Number(((Number(counts[outcome] || 0) / sessions) * 100).toFixed(2)) : 0;
+          }
+          return {
+            model,
+            sessions: Number(sessions),
+            counts,
+            ratios_percent: ratiosPercent,
+          };
+        })
+        .sort((a, b) => (b.sessions - a.sessions) || a.model.localeCompare(b.model));
+
+      const daySwitchEvents = {};
+      const projectDailyRows = [];
+      let totalSwitchEvents = 0;
+      let daysWithSwitches = 0;
+      for (const day of Object.keys(dayRowsMap).sort((a, b) => a.localeCompare(b))) {
+        const rows = (dayRowsMap[day] || []).slice().sort((a, b) => (a.start_ms - b.start_ms) || a.session_id.localeCompare(b.session_id));
+        let switches = 0;
+        let prevProject = null;
+        const uniqueProjects = new Set();
+        for (const row of rows) {
+          uniqueProjects.add(row.project);
+          if (prevProject !== null && row.project !== prevProject) switches += 1;
+          prevProject = row.project;
+        }
+        daySwitchEvents[day] = switches;
+        totalSwitchEvents += switches;
+        if (switches > 0) daysWithSwitches += 1;
+        projectDailyRows.push({
+          date: day,
+          sessions: rows.length,
+          switch_events: switches,
+          unique_projects: uniqueProjects.size,
+        });
+      }
+
+      const switchBucketOutcomeCounter = {};
+      const switchBucketSessionCounter = {};
+      for (const bucket of SWITCH_BUCKETS) {
+        switchBucketOutcomeCounter[bucket.key] = {};
+        switchBucketSessionCounter[bucket.key] = 0;
+      }
+      for (const row of filtered) {
+        if (!row || !row.facet_present || typeof row.outcome !== 'string' || !row.outcome) continue;
+        const day = typeof row.day_utc === 'string' && row.day_utc ? row.day_utc : dayKeyFromIso(String(row.start_time || ''));
+        if (!day) continue;
+        const bucket = contextSwitchBucket(Number(daySwitchEvents[day] || 0));
+        switchBucketSessionCounter[bucket] = (switchBucketSessionCounter[bucket] || 0) + 1;
+        const bucketCounter = switchBucketOutcomeCounter[bucket] || {};
+        bucketCounter[row.outcome] = (bucketCounter[row.outcome] || 0) + 1;
+        switchBucketOutcomeCounter[bucket] = bucketCounter;
+      }
+
+      const switchOutcomeRows = SWITCH_BUCKETS.map((bucket) => {
+        const sessions = Number(switchBucketSessionCounter[bucket.key] || 0);
+        const counts = switchBucketOutcomeCounter[bucket.key] || {};
+        const toPct = (key) => sessions > 0 ? Number((((Number(counts[key] || 0)) / sessions) * 100).toFixed(2)) : 0;
+        return {
+          label: bucket.label,
+          sessions,
+          fully_achieved: toPct('fully_achieved'),
+          mostly_achieved: toPct('mostly_achieved'),
+          not_achieved: toPct('not_achieved'),
+        };
+      });
+
+      const sortedIntervals = intervals.slice().sort((a, b) => a.start_ms - b.start_ms);
+      let overlapEvents = 0;
+      const involved = new Set();
+      for (let i = 0; i < sortedIntervals.length; i += 1) {
+        const a = sortedIntervals[i];
+        for (let j = i + 1; j < sortedIntervals.length; j += 1) {
+          const b = sortedIntervals[j];
+          if (b.start_ms >= a.end_ms) break;
+          if (b.end_ms > a.start_ms) {
+            overlapEvents += 1;
+            involved.add(a.session_id);
+            involved.add(b.session_id);
+          }
+        }
+      }
+
+      const sweepEvents = [];
+      for (const it of sortedIntervals) {
+        if (it.end_ms <= it.start_ms) continue;
+        sweepEvents.push({ ts: it.start_ms, delta: 1 });
+        sweepEvents.push({ ts: it.end_ms, delta: -1 });
+      }
+      sweepEvents.sort((a, b) => (a.ts - b.ts) || (a.delta - b.delta));
+
+      let current = 0;
+      let maxConcurrent = 0;
+      let overlapSeconds = 0;
+      for (let i = 0; i < sweepEvents.length; i += 1) {
+        const t = sweepEvents[i].ts;
+        while (i < sweepEvents.length && sweepEvents[i].ts === t) {
+          current += sweepEvents[i].delta;
+          if (current > maxConcurrent) maxConcurrent = current;
+          i += 1;
+        }
+        if (i < sweepEvents.length) {
+          const nextTs = sweepEvents[i].ts;
+          if (current >= 2) {
+            overlapSeconds += Math.max(0, (nextTs - t) / 1000);
+          }
+        }
+        i -= 1;
+      }
+
+      const messageTotal = filtered.reduce((sum, row) => sum + Number(row.messages_total || 0), 0);
+      const messageInvolved = filtered
+        .filter((row) => involved.has(String(row.session_id || '')))
+        .reduce((sum, row) => sum + Number(row.messages_total || 0), 0);
+
+      const overlapMinutes = Number((overlapSeconds / 60).toFixed(2));
+      const sessionsInvolved = involved.size;
+      const overlapSessionShare = filtered.length > 0 ? Number(((sessionsInvolved / filtered.length) * 100).toFixed(2)) : 0;
+      const overlapMessageShare = messageTotal > 0 ? Number(((messageInvolved / messageTotal) * 100).toFixed(2)) : 0;
+
+      const archivedRatio = filtered.length > 0 ? Number(((archivedSessions / filtered.length) * 100).toFixed(1)) : 0;
+      const facetCoveragePct = filtered.length > 0 ? Number(((sessionsFaceted / filtered.length) * 100).toFixed(2)) : 0;
+
+      return {
+        metrics: {
+          sessions_total: filtered.length,
+          sessions_faceted: sessionsFaceted,
+          facet_coverage: facetCoveragePct,
+          tool_calls: toolCalls,
+          tool_errors: toolErrors,
+          input_tokens: inputTokens,
+          output_tokens: outputTokens,
+          archived_sessions: archivedSessions,
+          archived_ratio: archivedRatio,
+        },
+        response_time_distribution: { items: responseItems, count: responseCount },
+        daily_activity_utc: dailyRows,
+        model_sessions_time_series: { dates: modelDays, series: modelSeries },
+        model_outcome_matrix: { rows: modelOutcomeRows },
+        parallel_sessions: {
+          overlap_events: overlapEvents,
+          sessions_involved: sessionsInvolved,
+          message_share_percent: overlapMessageShare,
+        },
+        concurrency_quality: {
+          max_concurrent_sessions: maxConcurrent,
+          overlap_minutes: overlapMinutes,
+          sessions_involved: sessionsInvolved,
+          overlap_session_share_percent: overlapSessionShare,
+          message_share_percent: overlapMessageShare,
+        },
+        project_context_switching: {
+          daily: projectDailyRows,
+          switch_events_total: totalSwitchEvents,
+          days_with_switches: daysWithSwitches,
+          outcome_by_bucket: switchOutcomeRows,
+        },
+        message_hours_utc: messageHourCounter,
+        tool_error_categories: sortedCounterItems(toolErrorCounter, 12),
+        source_distribution: sortedCounterItems(sourceCounter, 10),
+        approval_mode_distribution: sortedCounterItems(approvalCounter, 10),
+        sandbox_type_distribution: sortedCounterItems(sandboxCounter, 10),
+        cli_version_distribution: sortedCounterItems(cliCounter, 10),
+        archived_status: { active: activeSessions, archived: archivedSessions },
+        archive_latency_distribution: {
+          count: archivedLatencyHours.length,
+          items: archiveItems,
+        },
+      };
+    }
+
+    function updateMetricCards(metrics) {
+      const safe = metrics && typeof metrics === 'object' ? metrics : {};
+      const cards = document.querySelectorAll('.metric[data-metric]');
+      for (const card of cards) {
+        const key = card.getAttribute('data-metric') || '';
+        const kind = card.getAttribute('data-kind') || '';
+        const valueNode = card.querySelector('.metric-value');
+        if (!valueNode) continue;
+        const value = Number(safe[key] || 0);
+        if (kind === 'int') {
+          valueNode.textContent = formatCompactInt(value);
+        } else if (kind === 'pct2') {
+          valueNode.textContent = `${value.toFixed(2)}%`;
+        } else if (kind === 'pct1') {
+          valueNode.textContent = `${value.toFixed(1)}%`;
+        } else {
+          valueNode.textContent = `${value}`;
+        }
+      }
+    }
+
+    function renderResponseTimeChart() {
+      const items = Array.isArray(chartData.response_time_distribution?.items)
+        ? chartData.response_time_distribution.items
+        : [];
+      const labels = items.map(item => item.label);
+      const values = items.map(item => Number(item.count || 0));
+      const maxValue = Math.max(1, ...values);
+
+      responseChart.setOption({
+        animation: false,
+        grid: { left: 112, right: 42, top: 12, bottom: 8, containLabel: false },
+        xAxis: {
+          type: 'value',
+          min: 0,
+          max: maxValue,
+          splitLine: { lineStyle: { color: '#243042' } },
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { show: false }
+        },
+        yAxis: {
+          type: 'category',
+          inverse: true,
+          data: labels,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { color: '#c8d5e8', fontSize: 14 }
+        },
+        series: [{
+          type: 'bar',
+          data: values,
+          barWidth: 10,
+          itemStyle: {
+            color: '#6e8fff',
+            borderRadius: [6, 6, 6, 6]
+          },
+          label: {
+            show: true,
+            position: 'right',
+            color: '#b4c4db',
+            fontSize: 14,
+            formatter: ({ value }) => formatCompactInt(value)
+          }
+        }]
+      });
+
+      const total = Number(chartData.response_time_distribution?.count || 0);
+      document.getElementById('response-time-summary').textContent = `Bucketed responses: ${formatCompactInt(total)}`;
+    }
+
+    function renderDailyActivityChart() {
+      const items = Array.isArray(chartData.daily_activity_utc) ? chartData.daily_activity_utc : [];
+      if (items.length === 0) {
+        dailyActivityChart.setOption({
+          animation: false,
+          xAxis: { type: 'category', data: [] },
+          yAxis: { type: 'value' },
+          series: [],
+          title: { text: 'No data', left: 'center', top: 'middle', textStyle: { color: '#8ea2bc', fontSize: 14 } }
+        });
+        document.getElementById('daily-activity-summary').textContent = 'No daily activity records available.';
+        return;
+      }
+
+      const dates = items.map(item => item.date);
+      const sessions = items.map(item => Number(item.sessions || 0));
+      const messages = items.map(item => Number(item.messages || 0));
+      const toolErrors = items.map(item => Number(item.tool_errors || 0));
+
+      dailyActivityChart.setOption({
+        animation: false,
+        legend: {
+          top: 2,
+          right: 8,
+          textStyle: { color: '#b9cae0', fontSize: 12 },
+          itemWidth: 12,
+          itemHeight: 8
+        },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: '#0f141c',
+          borderColor: '#2c3646',
+          textStyle: { color: '#dce7f5' }
+        },
+        grid: { left: 48, right: 52, top: 40, bottom: 24, containLabel: false },
+        xAxis: {
+          type: 'category',
+          data: dates,
+          boundaryGap: true,
+          axisLine: { lineStyle: { color: '#2b3646' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9fb3cd',
+            fontSize: 11,
+            formatter: (value) => String(value).slice(5)
+          }
+        },
+        yAxis: [
+          {
+            type: 'value',
+            name: 'Sessions',
+            splitLine: { lineStyle: { color: '#223042' } },
+            axisLine: { show: false },
+            axisTick: { show: false },
+            axisLabel: { color: '#9fb3cd', fontSize: 11, formatter: (value) => formatCompactInt(value) }
+          },
+          {
+            type: 'value',
+            name: 'Messages',
+            splitLine: { show: false },
+            axisLine: { show: false },
+            axisTick: { show: false },
+            axisLabel: { color: '#9fb3cd', fontSize: 11, formatter: (value) => formatCompactInt(value) }
+          }
+        ],
+        series: [
+          {
+            name: 'Sessions',
+            type: 'line',
+            smooth: true,
+            symbol: 'circle',
+            symbolSize: 5,
+            data: sessions,
+            lineStyle: { width: 2, color: '#7d90ff' },
+            itemStyle: { color: '#7d90ff' }
+          },
+          {
+            name: 'Messages',
+            type: 'bar',
+            yAxisIndex: 1,
+            data: messages,
+            itemStyle: {
+              color: 'rgba(42, 209, 127, 0.55)',
+              borderRadius: [4, 4, 0, 0]
+            }
+          },
+          {
+            name: 'Tool Errors',
+            type: 'line',
+            smooth: true,
+            symbol: 'circle',
+            symbolSize: 4,
+            data: toolErrors,
+            lineStyle: { width: 2, color: '#ff6472' },
+            itemStyle: { color: '#ff6472' }
+          }
+        ]
+      });
+
+      const totalSessions = sessions.reduce((sum, val) => sum + val, 0);
+      const totalMessages = messages.reduce((sum, val) => sum + val, 0);
+      const peakSessions = Math.max(...sessions);
+      const peakIdx = sessions.indexOf(peakSessions);
+      const peakDate = peakIdx >= 0 ? dates[peakIdx] : '-';
+      document.getElementById('daily-activity-summary').textContent =
+        `Days: ${items.length} • Sessions: ${formatCompactInt(totalSessions)} • Messages: ${formatCompactInt(totalMessages)} • Peak day: ${peakDate} (${formatCompactInt(peakSessions)} sessions)`;
+    }
+
+    function renderModelUsageChart() {
+      const modelSeries = chartData.model_sessions_time_series || {};
+      const dates = Array.isArray(modelSeries.dates) ? modelSeries.dates : [];
+      const rawSeries = Array.isArray(modelSeries.series) ? modelSeries.series : [];
+      const series = rawSeries
+        .filter(item => item && typeof item.model === 'string' && Array.isArray(item.values))
+        .map(item => ({
+          name: item.model,
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 4,
+          data: item.values.map(v => Number(v || 0)),
+          lineStyle: { width: 2 }
+        }));
+
+      if (dates.length === 0 || series.length === 0) {
+        modelUsageChart.setOption({
+          animation: false,
+          xAxis: { type: 'category', data: [] },
+          yAxis: { type: 'value' },
+          series: [],
+          title: { text: 'No model signal data', left: 'center', top: 'middle', textStyle: { color: '#8ea2bc', fontSize: 14 } }
+        });
+        document.getElementById('model-usage-summary').textContent = 'No model usage signal found in rollout turn contexts.';
+        return;
+      }
+
+      modelUsageChart.setOption({
+        animation: false,
+        legend: {
+          type: 'scroll',
+          top: 2,
+          right: 8,
+          data: series.map(item => item.name),
+          textStyle: { color: '#b9cae0', fontSize: 12 },
+          itemWidth: 12,
+          itemHeight: 8
+        },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: '#0f141c',
+          borderColor: '#2c3646',
+          textStyle: { color: '#dce7f5' }
+        },
+        grid: { left: 48, right: 42, top: 44, bottom: 24, containLabel: false },
+        xAxis: {
+          type: 'category',
+          data: dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#2b3646' } },
+          axisTick: { show: false },
+          axisLabel: { color: '#9fb3cd', fontSize: 11, formatter: (value) => String(value).slice(5) }
+        },
+        yAxis: {
+          type: 'value',
+          minInterval: 1,
+          splitLine: { lineStyle: { color: '#223042' } },
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { color: '#9fb3cd', fontSize: 11, formatter: (value) => formatCompactInt(value) }
+        },
+        series
+      });
+
+      const modelNames = series.map(item => item.name);
+      document.getElementById('model-usage-summary').textContent =
+        `Models tracked: ${modelNames.length} • ${modelNames.join(', ')}`;
+    }
+
+    function renderModelOutcomeMatrixChart() {
+      const matrix = chartData.model_outcome_matrix || {};
+      const rows = Array.isArray(matrix.rows) ? matrix.rows : [];
+
+      if (rows.length === 0) {
+        modelOutcomeMatrixChart.setOption({
+          animation: false,
+          xAxis: { type: 'value' },
+          yAxis: { type: 'category', data: [] },
+          series: [],
+          title: { text: 'No model-outcome data', left: 'center', top: 'middle', textStyle: { color: '#8ea2bc', fontSize: 14 } }
+        });
+        document.getElementById('model-outcome-summary').textContent = 'No aligned model-outcome data.';
+        return;
+      }
+
+      const ranked = rows
+        .filter(row => row && typeof row.model === 'string' && typeof row.sessions === 'number')
+        .map(row => {
+          const sessions = Number(row.sessions || 0);
+          const fullyCount = Number(row.counts?.fully_achieved || 0);
+          const mostlyCount = Number(row.counts?.mostly_achieved || 0);
+          const notCount = Number(row.counts?.not_achieved || 0);
+          const knownCount = fullyCount + mostlyCount + notCount;
+          const otherCount = Math.max(0, sessions - knownCount);
+          const pct = (value) => sessions > 0 ? (value / sessions) * 100 : 0;
+          const fullyPct = pct(fullyCount);
+          const mostlyPct = pct(mostlyCount);
+          const otherPct = pct(otherCount);
+          const notPct = pct(notCount);
+          return {
+            model: row.model,
+            sessions,
+            fullyCount,
+            mostlyCount,
+            otherCount,
+            notCount,
+            fullyPct,
+            mostlyPct,
+            otherPct,
+            notPct,
+            successPct: fullyPct + mostlyPct,
+            isUnknownModel: row.model === '<unknown>'
+          };
+        })
+        .sort((a, b) =>
+          (b.successPct - a.successPct) ||
+          (b.sessions - a.sessions) ||
+          ((a.isUnknownModel ? 1 : 0) - (b.isUnknownModel ? 1 : 0))
+        );
+
+      const labels = ranked.map(row => `${row.model} (n=${formatCompactInt(row.sessions)})`);
+      const fullyValues = ranked.map(row => modelOutcomeViewMode === 'count' ? row.fullyCount : row.fullyPct);
+      const mostlyValues = ranked.map(row => modelOutcomeViewMode === 'count' ? row.mostlyCount : row.mostlyPct);
+      const otherValues = ranked.map(row => modelOutcomeViewMode === 'count' ? row.otherCount : row.otherPct);
+      const notValues = ranked.map(row => modelOutcomeViewMode === 'count' ? row.notCount : row.notPct);
+
+      const valueFormatter = (value) => {
+        if (modelOutcomeViewMode === 'count') return formatCompactInt(value);
+        return `${Number(value || 0).toFixed(0)}%`;
+      };
+
+      modelOutcomeMatrixChart.setOption({
+        animation: false,
+        legend: {
+          top: 2,
+          right: 8,
+          textStyle: { color: '#b9cae0', fontSize: 12 },
+          itemWidth: 12,
+          itemHeight: 8,
+          data: ['Fully', 'Mostly', 'Partially+Unclear', 'Not']
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          backgroundColor: '#0f141c',
+          borderColor: '#2c3646',
+          textStyle: { color: '#dce7f5' },
+          formatter: (params) => {
+            if (!Array.isArray(params) || params.length === 0) return '';
+            const idx = Number(params[0].dataIndex || 0);
+            const row = ranked[idx];
+            if (!row) return '';
+            return [
+              `${row.model} (n=${formatCompactInt(row.sessions)})`,
+              `Fully: ${row.fullyPct.toFixed(1)}% (${formatCompactInt(row.fullyCount)})`,
+              `Mostly: ${row.mostlyPct.toFixed(1)}% (${formatCompactInt(row.mostlyCount)})`,
+              `Partially+Unclear: ${row.otherPct.toFixed(1)}% (${formatCompactInt(row.otherCount)})`,
+              `Not: ${row.notPct.toFixed(1)}% (${formatCompactInt(row.notCount)})`
+            ].join('<br/>');
+          }
+        },
+        grid: { left: 230, right: 30, top: 40, bottom: 18, containLabel: false },
+        xAxis: {
+          type: 'value',
+          min: 0,
+          max: modelOutcomeViewMode === 'count' ? null : 100,
+          splitLine: { lineStyle: { color: '#223042' } },
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9fb3cd',
+            fontSize: 11,
+            formatter: (value) => modelOutcomeViewMode === 'count' ? formatCompactInt(value) : `${value}%`
+          }
+        },
+        yAxis: {
+          type: 'category',
+          data: labels,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { color: '#c8d5e8', fontSize: 12 }
+        },
+        series: [
+          {
+            name: 'Fully',
+            type: 'bar',
+            stack: 'total',
+            data: fullyValues,
+            itemStyle: { color: '#2ad17f' },
+            label: {
+              show: true,
+              color: '#edf3fb',
+              fontSize: 11,
+              formatter: ({ value }) => Number(value || 0) >= 8 ? valueFormatter(value) : ''
+            },
+            emphasis: { focus: 'series' }
+          },
+          {
+            name: 'Mostly',
+            type: 'bar',
+            stack: 'total',
+            data: mostlyValues,
+            itemStyle: { color: '#5c8dff' },
+            label: {
+              show: true,
+              color: '#edf3fb',
+              fontSize: 11,
+              formatter: ({ value }) => Number(value || 0) >= 8 ? valueFormatter(value) : ''
+            },
+            emphasis: { focus: 'series' }
+          },
+          {
+            name: 'Partially+Unclear',
+            type: 'bar',
+            stack: 'total',
+            data: otherValues,
+            itemStyle: { color: '#6f7d92' },
+            label: {
+              show: true,
+              color: '#edf3fb',
+              fontSize: 11,
+              formatter: ({ value }) => Number(value || 0) >= 8 ? valueFormatter(value) : ''
+            },
+            emphasis: { focus: 'series' }
+          },
+          {
+            name: 'Not',
+            type: 'bar',
+            stack: 'total',
+            data: notValues,
+            itemStyle: { color: '#ff5c67' },
+            label: {
+              show: true,
+              color: '#edf3fb',
+              fontSize: 11,
+              formatter: ({ value }) => Number(value || 0) >= 8 ? valueFormatter(value) : ''
+            },
+            emphasis: { focus: 'series' }
+          }
+        ]
+      });
+
+      const best = ranked[0];
+      const lowSampleCount = ranked.filter(row => row.sessions < 20).length;
+      if (best) {
+        document.getElementById('model-outcome-summary').textContent =
+          `Sorted by fully+mostly ratio • Top: ${best.model} (${best.successPct.toFixed(1)}%) • Low-sample models (<20 sessions): ${formatCompactInt(lowSampleCount)}`;
+      } else {
+        document.getElementById('model-outcome-summary').textContent = 'Model outcome composition rendered.';
+      }
+    }
+
+    function renderHorizontalDistribution(chart, rawItems, color, left = 132) {
+      const items = Array.isArray(rawItems) && rawItems.length > 0
+        ? rawItems
+        : [{ label: 'No Data', count: 0 }];
+      const labels = items.map(item => item.label);
+      const values = items.map(item => Number(item.count || 0));
+      const maxValue = Math.max(1, ...values);
+
+      chart.setOption({
+        animation: false,
+        grid: { left, right: 42, top: 8, bottom: 8, containLabel: false },
+        xAxis: {
+          type: 'value',
+          min: 0,
+          max: maxValue,
+          splitLine: { lineStyle: { color: '#243042' } },
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { show: false }
+        },
+        yAxis: {
+          type: 'category',
+          data: labels,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { color: '#c8d5e8', fontSize: 13 }
+        },
+        series: [{
+          type: 'bar',
+          data: values,
+          barWidth: 10,
+          itemStyle: {
+            color,
+            borderRadius: [6, 6, 6, 6]
+          },
+          label: {
+            show: true,
+            position: 'right',
+            color: '#b4c4db',
+            fontSize: 13,
+            formatter: ({ value }) => formatCompactInt(value)
+          }
+        }]
+      });
+    }
+
+    function renderConcurrencyQualityCard() {
+      const cq = chartData.concurrency_quality || {};
+      const maxConcurrent = Number(cq.max_concurrent_sessions || 0);
+      const overlapMinutes = Number(cq.overlap_minutes || 0);
+      const messageShare = Number(cq.message_share_percent || 0);
+      const sessionsInvolved = Number(cq.sessions_involved || 0);
+      const overlapSessionShare = Number(cq.overlap_session_share_percent || 0);
+
+      document.getElementById('concurrency-max').textContent = formatCompactInt(maxConcurrent);
+      document.getElementById('concurrency-overlap-minutes').textContent = formatCompactInt(Math.round(overlapMinutes));
+      document.getElementById('concurrency-message-share').textContent = `${toOneDecimal(messageShare)}%`;
+
+      const desc = overlapMinutes > 0
+        ? `Concurrent execution detected across ${formatCompactInt(sessionsInvolved)} sessions (${toOneDecimal(overlapSessionShare)}% of sessions).`
+        : 'No overlapping sessions were detected in this reporting window.';
+      document.getElementById('concurrency-description').textContent = desc;
+    }
+
+    function renderProjectSwitchingCharts() {
+      const payload = chartData.project_context_switching || {};
+      const daily = Array.isArray(payload.daily) ? payload.daily : [];
+      const bucketRows = Array.isArray(payload.outcome_by_bucket) ? payload.outcome_by_bucket : [];
+
+      if (daily.length === 0) {
+        projectSwitchDailyChart.setOption({
+          animation: false,
+          xAxis: { type: 'category', data: [] },
+          yAxis: { type: 'value' },
+          series: [],
+          title: { text: 'No switching data', left: 'center', top: 'middle', textStyle: { color: '#8ea2bc', fontSize: 14 } }
+        });
+      } else {
+        const dates = daily.map(row => row.date);
+        const switches = daily.map(row => Number(row.switch_events || 0));
+        const sessions = daily.map(row => Number(row.sessions || 0));
+
+        projectSwitchDailyChart.setOption({
+          animation: false,
+          legend: {
+            top: 2,
+            right: 8,
+            textStyle: { color: '#b9cae0', fontSize: 12 },
+            itemWidth: 12,
+            itemHeight: 8
+          },
+          tooltip: {
+            trigger: 'axis',
+            backgroundColor: '#0f141c',
+            borderColor: '#2c3646',
+            textStyle: { color: '#dce7f5' }
+          },
+          grid: { left: 48, right: 42, top: 34, bottom: 22, containLabel: false },
+          xAxis: {
+            type: 'category',
+            data: dates,
+            boundaryGap: true,
+            axisLine: { lineStyle: { color: '#2b3646' } },
+            axisTick: { show: false },
+            axisLabel: { color: '#9fb3cd', fontSize: 11, formatter: (value) => String(value).slice(5) }
+          },
+          yAxis: [
+            {
+              type: 'value',
+              name: 'Switches',
+              minInterval: 1,
+              splitLine: { lineStyle: { color: '#223042' } },
+              axisLine: { show: false },
+              axisTick: { show: false },
+              axisLabel: { color: '#9fb3cd', fontSize: 11, formatter: (value) => formatCompactInt(value) }
+            },
+            {
+              type: 'value',
+              name: 'Sessions',
+              minInterval: 1,
+              splitLine: { show: false },
+              axisLine: { show: false },
+              axisTick: { show: false },
+              axisLabel: { color: '#9fb3cd', fontSize: 11, formatter: (value) => formatCompactInt(value) }
+            }
+          ],
+          series: [
+            {
+              name: 'Switch Events',
+              type: 'line',
+              smooth: true,
+              symbol: 'circle',
+              symbolSize: 4,
+              data: switches,
+              lineStyle: { width: 2, color: '#ff7a85' },
+              itemStyle: { color: '#ff7a85' }
+            },
+            {
+              name: 'Sessions',
+              type: 'bar',
+              yAxisIndex: 1,
+              data: sessions,
+              itemStyle: { color: 'rgba(92, 141, 255, 0.6)', borderRadius: [4, 4, 0, 0] }
+            }
+          ]
+        });
+      }
+
+      if (bucketRows.length === 0) {
+        projectSwitchOutcomeChart.setOption({
+          animation: false,
+          xAxis: { type: 'category', data: [] },
+          yAxis: { type: 'value' },
+          series: [],
+          title: { text: 'No outcome-switch data', left: 'center', top: 'middle', textStyle: { color: '#8ea2bc', fontSize: 14 } }
+        });
+        return;
+      }
+
+      const labels = bucketRows.map(row => row.label);
+      const fully = bucketRows.map(row => Number(row.fully_achieved || 0));
+      const mostly = bucketRows.map(row => Number(row.mostly_achieved || 0));
+      const notAchieved = bucketRows.map(row => Number(row.not_achieved || 0));
+
+      projectSwitchOutcomeChart.setOption({
+        animation: false,
+        legend: {
+          top: 2,
+          right: 8,
+          textStyle: { color: '#b9cae0', fontSize: 12 },
+          itemWidth: 12,
+          itemHeight: 8
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          backgroundColor: '#0f141c',
+          borderColor: '#2c3646',
+          textStyle: { color: '#dce7f5' }
+        },
+        grid: { left: 48, right: 26, top: 34, bottom: 22, containLabel: false },
+        xAxis: {
+          type: 'category',
+          data: labels,
+          axisLine: { lineStyle: { color: '#2b3646' } },
+          axisTick: { show: false },
+          axisLabel: { color: '#9fb3cd', fontSize: 11 }
+        },
+        yAxis: {
+          type: 'value',
+          min: 0,
+          max: 100,
+          splitLine: { lineStyle: { color: '#223042' } },
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { color: '#9fb3cd', fontSize: 11, formatter: (value) => `${value}%` }
+        },
+        series: [
+          { name: 'Fully Achieved', type: 'bar', stack: 'outcome', data: fully, itemStyle: { color: '#2ad17f' } },
+          { name: 'Mostly Achieved', type: 'bar', stack: 'outcome', data: mostly, itemStyle: { color: '#7d90ff' } },
+          { name: 'Not Achieved', type: 'bar', stack: 'outcome', data: notAchieved, itemStyle: { color: '#ff5f6e' } }
+        ]
+      });
+    }
+
+    function computePeriodCounts(offsetHours) {
+      const hourCounts = chartData.message_hours_utc || {};
+      const periods = {
+        morning: 0,
+        afternoon: 0,
+        evening: 0,
+        night: 0,
+      };
+
+      Object.entries(hourCounts).forEach(([hourText, count]) => {
+        const utcHour = Number(hourText);
+        const localHour = (utcHour + offsetHours + 24) % 24;
+        const numericCount = Number(count || 0);
+
+        if (localHour >= 6 && localHour < 12) {
+          periods.morning += numericCount;
+        } else if (localHour >= 12 && localHour < 18) {
+          periods.afternoon += numericCount;
+        } else if (localHour >= 18 && localHour < 24) {
+          periods.evening += numericCount;
+        } else {
+          periods.night += numericCount;
+        }
+      });
+
+      return [
+        { label: 'Morning (6-12)', value: periods.morning },
+        { label: 'Afternoon (12-18)', value: periods.afternoon },
+        { label: 'Evening (18-24)', value: periods.evening },
+        { label: 'Night (0-6)', value: periods.night },
+      ];
+    }
+
+    function renderTimeOfDayChart(offsetHours) {
+      const items = computePeriodCounts(offsetHours);
+      const labels = items.map(item => item.label);
+      const values = items.map(item => item.value);
+      const maxValue = Math.max(1, ...values);
+
+      timeOfDayChart.setOption({
+        animation: false,
+        grid: { left: 132, right: 44, top: 8, bottom: 8, containLabel: false },
+        xAxis: {
+          type: 'value',
+          min: 0,
+          max: maxValue,
+          splitLine: { lineStyle: { color: '#243042' } },
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { show: false }
+        },
+        yAxis: {
+          type: 'category',
+          data: labels,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { color: '#c8d5e8', fontSize: 13 }
+        },
+        series: [{
+          type: 'bar',
+          data: values,
+          barWidth: 10,
+          itemStyle: {
+            color: '#7d90ff',
+            borderRadius: [6, 6, 6, 6]
+          },
+          label: {
+            show: true,
+            position: 'right',
+            color: '#b4c4db',
+            fontSize: 13,
+            formatter: ({ value }) => formatCompactInt(value)
+          }
+        }]
+      });
+    }
+
+    function renderToolErrorsChart() {
+      renderHorizontalDistribution(toolErrorsChart, chartData.tool_error_categories, '#ff5f6e', 112);
+    }
+
+    function renderSqliteDistributionCharts() {
+      renderHorizontalDistribution(sourceChart, chartData.source_distribution, '#7a9bff', 122);
+      renderHorizontalDistribution(sandboxChart, chartData.sandbox_type_distribution, '#80a8ff', 160);
+      renderHorizontalDistribution(approvalChart, chartData.approval_mode_distribution, '#5db4ff', 132);
+      renderHorizontalDistribution(cliVersionChart, chartData.cli_version_distribution, '#35cf8b', 150);
+    }
+
+    function renderArchiveLatencyChart() {
+      const dist = chartData.archive_latency_distribution || {};
+      const items = Array.isArray(dist.items) ? dist.items : [];
+      renderHorizontalDistribution(archiveLatencyChart, items, '#45d085', 122);
+
+      const archived = Number(chartData.archived_status?.archived || 0);
+      const active = Number(chartData.archived_status?.active || 0);
+      const records = Number(dist.count || 0);
+      document.getElementById('archive-latency-note').textContent =
+        `Archived sessions: ${formatCompactInt(archived)} • Active sessions: ${formatCompactInt(active)} • Latency records: ${formatCompactInt(records)}`;
+    }
+
+    function currentOffsetFromUI() {
+      const select = document.getElementById('timezone-select');
+      const customInput = document.getElementById('custom-timezone-offset');
+      if (select.value === 'custom') {
+        const parsed = Number(customInput.value);
+        return Number.isFinite(parsed) ? parsed : -8;
+      }
+      return Number(select.value);
+    }
+
+    function handleTimezoneChange() {
+      const select = document.getElementById('timezone-select');
+      const customInput = document.getElementById('custom-timezone-offset');
+      customInput.style.display = select.value === 'custom' ? 'inline-block' : 'none';
+      renderTimeOfDayChart(currentOffsetFromUI());
+    }
+
+    function setModelOutcomeView(mode) {
+      modelOutcomeViewMode = mode === 'count' ? 'count' : 'ratio';
+      const ratioBtn = document.getElementById('model-outcome-view-ratio');
+      const countBtn = document.getElementById('model-outcome-view-count');
+      ratioBtn.classList.toggle('active', modelOutcomeViewMode === 'ratio');
+      countBtn.classList.toggle('active', modelOutcomeViewMode === 'count');
+      renderModelOutcomeMatrixChart();
+    }
+
+    function renderAllVisuals() {
+      renderResponseTimeChart();
+      renderDailyActivityChart();
+      renderModelUsageChart();
+      renderModelOutcomeMatrixChart();
+      renderConcurrencyQualityCard();
+      renderTimeOfDayChart(currentOffsetFromUI());
+      renderToolErrorsChart();
+      renderProjectSwitchingCharts();
+      renderSqliteDistributionCharts();
+      renderArchiveLatencyChart();
+    }
+
+    function listRollupDays() {
+      const rollups = Array.isArray(baseData.session_rollups) ? baseData.session_rollups : [];
+      const days = new Set();
+      for (const row of rollups) {
+        if (!row || typeof row !== 'object') continue;
+        const day = typeof row.day_utc === 'string' && row.day_utc ? row.day_utc : dayKeyFromIso(String(row.start_time || ''));
+        if (day) days.add(day);
+      }
+      return Array.from(days).sort((a, b) => a.localeCompare(b));
+    }
+
+    function markRangeChip(activeId) {
+      for (const id of ['range-chip-7d', 'range-chip-30d', 'range-chip-90d', 'range-chip-all']) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        el.classList.toggle('active', id === activeId);
+      }
+    }
+
+    function applyDateRange(startDay, endDay, activeChipId = '') {
+      let start = startDay || '';
+      let end = endDay || '';
+      if (start && end && start > end) {
+        const tmp = start;
+        start = end;
+        end = tmp;
+      }
+      const startInput = document.getElementById('date-start');
+      const endInput = document.getElementById('date-end');
+      startInput.value = start;
+      endInput.value = end;
+      markRangeChip(activeChipId);
+      chartData = buildFilteredView(start || null, end || null);
+      updateMetricCards(chartData.metrics);
+      renderAllVisuals();
+    }
+
+    function initDateRangeControls() {
+      const days = listRollupDays();
+      const startInput = document.getElementById('date-start');
+      const endInput = document.getElementById('date-end');
+      const minDay = days.length > 0 ? days[0] : '';
+      const maxDay = days.length > 0 ? days[days.length - 1] : '';
+      startInput.min = minDay;
+      startInput.max = maxDay;
+      endInput.min = minDay;
+      endInput.max = maxDay;
+
+      const applyPresetDays = (daysBack, chipId) => {
+        if (!maxDay) {
+          applyDateRange('', '', chipId);
+          return;
+        }
+        const computedStart = daysBack > 0 ? shiftDay(maxDay, -(daysBack - 1)) : minDay;
+        const start = minDay && computedStart < minDay ? minDay : computedStart;
+        applyDateRange(start, maxDay, chipId);
+      };
+
+      document.getElementById('range-chip-7d').addEventListener('click', () => applyPresetDays(7, 'range-chip-7d'));
+      document.getElementById('range-chip-30d').addEventListener('click', () => applyPresetDays(30, 'range-chip-30d'));
+      document.getElementById('range-chip-90d').addEventListener('click', () => applyPresetDays(90, 'range-chip-90d'));
+      document.getElementById('range-chip-all').addEventListener('click', () => applyDateRange(minDay, maxDay, 'range-chip-all'));
+
+      startInput.addEventListener('change', () => applyDateRange(startInput.value, endInput.value, ''));
+      endInput.addEventListener('change', () => applyDateRange(startInput.value, endInput.value, ''));
+
+      applyPresetDays(30, 'range-chip-30d');
+    }
+
+    document.getElementById('timezone-select').addEventListener('change', handleTimezoneChange);
+    document.getElementById('custom-timezone-offset').addEventListener('input', () => {
+      if (document.getElementById('timezone-select').value === 'custom') {
+        renderTimeOfDayChart(currentOffsetFromUI());
+      }
+    });
+    document.getElementById('model-outcome-view-ratio').addEventListener('click', () => setModelOutcomeView('ratio'));
+    document.getElementById('model-outcome-view-count').addEventListener('click', () => setModelOutcomeView('count'));
+    initDateRangeControls();
+
+    const resizeAllCharts = () => {
+      responseChart.resize();
+      archiveLatencyChart.resize();
+      dailyActivityChart.resize();
+      modelUsageChart.resize();
+      modelOutcomeMatrixChart.resize();
+      timeOfDayChart.resize();
+      toolErrorsChart.resize();
+      projectSwitchDailyChart.resize();
+      projectSwitchOutcomeChart.resize();
+      sourceChart.resize();
+      sandboxChart.resize();
+      approvalChart.resize();
+      cliVersionChart.resize();
+    };
+
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => resizeAllCharts());
+      ro.observe(document.getElementById('response-time-chart'));
+      ro.observe(document.getElementById('archive-latency-chart'));
+      ro.observe(document.getElementById('daily-activity-chart'));
+      ro.observe(document.getElementById('model-usage-chart'));
+      ro.observe(document.getElementById('model-outcome-matrix-chart'));
+      ro.observe(document.getElementById('time-of-day-chart'));
+      ro.observe(document.getElementById('tool-errors-chart'));
+      ro.observe(document.getElementById('project-switch-daily-chart'));
+      ro.observe(document.getElementById('project-switch-outcome-chart'));
+      ro.observe(document.getElementById('source-chart'));
+      ro.observe(document.getElementById('sandbox-chart'));
+      ro.observe(document.getElementById('approval-chart'));
+      ro.observe(document.getElementById('cli-version-chart'));
+    }
+
+    window.addEventListener('resize', resizeAllCharts);
+    setTimeout(resizeAllCharts, 0);
+    setTimeout(resizeAllCharts, 120);
+  </script>
+</body>
+</html>

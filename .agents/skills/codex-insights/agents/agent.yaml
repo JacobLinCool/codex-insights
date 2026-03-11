@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Insights"
+  short_description: "Generate Codex usage insights from SQLite"
+  default_prompt: "Use $codex-insights to extract meta, classify facets, and render an insights report from Codex SQLite + rollouts."
