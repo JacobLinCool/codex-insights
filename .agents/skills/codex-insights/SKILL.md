@@ -1,6 +1,6 @@
 ---
 name: codex-insights
-description: Generate Codex usage insights from state_5.sqlite and rollout files. Use when you need meta/facets/report outputs with deterministic extraction, hybrid facet classification, redacted defaults, and HTML reporting.
+description: Generate Codex usage insights from state_5.sqlite and rollout files. Use when you need meta/facets/report outputs with deterministic extraction, rule-based facet classification by default (optional hybrid), redacted defaults, and HTML reporting.
 ---
 
 # Codex Insights
@@ -10,13 +10,14 @@ description: Generate Codex usage insights from state_5.sqlite and rollout files
 This skill builds Codex usage insights artifacts from local data:
 
 - Deterministic extraction: `manifest`, `meta`, `stats`
-- Hybrid semantic analysis: `facets`, `narrative`
+- Rule-based facets by default (`rules_only`), optional hybrid refinement (`hybrid`)
+- Narrative synthesis: `narrative` (LLM)
 - Deterministic rendering: `report.html`
 
 Default operating mode:
 
 - Scope: `sqlite_threads`
-- Facets engine: `hybrid` (rules + LLM)
+- Facets engine: `rules_only` (rule-based)
 - Report language: English
 - Privacy: `redacted`
 
@@ -43,7 +44,7 @@ python3 scripts/run_pipeline.py \
   --archived-root ~/.codex/archived_sessions \
   --scope sqlite_threads \
   --privacy redacted \
-  --engine hybrid \
+  --engine rules_only \
   --classifier-model gpt-5.3-codex-spark \
   --narrative-model gpt-5.3-codex
 ```

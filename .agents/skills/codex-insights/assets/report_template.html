@@ -346,7 +346,6 @@
       text-transform: uppercase;
     }
 
-    .timezone-row select,
     .timezone-row input {
       border: 1px solid var(--line);
       border-radius: 9px;
@@ -357,7 +356,6 @@
       outline: none;
     }
 
-    .timezone-row select:focus,
     .timezone-row input:focus {
       border-color: #3a4a63;
       box-shadow: 0 0 0 2px rgba(92, 141, 255, 0.15);
@@ -558,16 +556,8 @@
       <section class="chart-card">
         <h3 class="chart-title">User Messages By Time Of Day</h3>
         <div class="timezone-row">
-          <label for="timezone-select">Timezone</label>
-          <select id="timezone-select">
-            <option value="-8">PT (UTC-8)</option>
-            <option value="-5">ET (UTC-5)</option>
-            <option value="0">UTC</option>
-            <option value="1">CET (UTC+1)</option>
-            <option value="9">JST (UTC+9)</option>
-            <option value="custom">Custom...</option>
-          </select>
-          <input id="custom-timezone-offset" type="number" step="1" min="-12" max="14" style="display:none" placeholder="UTC" />
+          <label for="custom-timezone-offset">Timezone (UTC Offset)</label>
+          <input id="custom-timezone-offset" type="number" step="1" min="-12" max="14" placeholder="e.g. 8" />
         </div>
         <div id="time-of-day-chart" class="chart-small"></div>
       </section>
@@ -1810,21 +1800,49 @@
         `Archived sessions: ${formatCompactInt(archived)} • Active sessions: ${formatCompactInt(active)} • Latency records: ${formatCompactInt(records)}`;
     }
 
-    function currentOffsetFromUI() {
-      const select = document.getElementById('timezone-select');
-      const customInput = document.getElementById('custom-timezone-offset');
-      if (select.value === 'custom') {
-        const parsed = Number(customInput.value);
-        return Number.isFinite(parsed) ? parsed : -8;
-      }
-      return Number(select.value);
+    function clampTimezoneOffset(value) {
+      return Math.min(14, Math.max(-12, value));
     }
 
-    function handleTimezoneChange() {
-      const select = document.getElementById('timezone-select');
-      const customInput = document.getElementById('custom-timezone-offset');
-      customInput.style.display = select.value === 'custom' ? 'inline-block' : 'none';
-      renderTimeOfDayChart(currentOffsetFromUI());
+    function normalizeTimezoneOffset(value) {
+      return Math.round(clampTimezoneOffset(value));
+    }
+
+    function formatTimezoneOffset(value) {
+      return String(normalizeTimezoneOffset(value));
+    }
+
+    function getUserTimezoneOffset() {
+      return normalizeTimezoneOffset(-new Date().getTimezoneOffset() / 60);
+    }
+
+    function currentOffsetFromUI() {
+      const input = document.getElementById('custom-timezone-offset');
+      const parsed = Number(input.value);
+      if (!Number.isFinite(parsed)) {
+        return getUserTimezoneOffset();
+      }
+      return normalizeTimezoneOffset(parsed);
+    }
+
+    function initTimezoneControl() {
+      const input = document.getElementById('custom-timezone-offset');
+      input.value = formatTimezoneOffset(getUserTimezoneOffset());
+
+      input.addEventListener('input', () => {
+        const parsed = Number(input.value);
+        if (Number.isFinite(parsed)) {
+          renderTimeOfDayChart(normalizeTimezoneOffset(parsed));
+        }
+      });
+
+      const normalizeAndRender = () => {
+        const normalized = currentOffsetFromUI();
+        input.value = formatTimezoneOffset(normalized);
+        renderTimeOfDayChart(normalized);
+      };
+      input.addEventListener('change', normalizeAndRender);
+      input.addEventListener('blur', normalizeAndRender);
     }
 
     function setModelOutcomeView(mode) {
@@ -1918,12 +1936,7 @@
       applyPresetDays(30, 'range-chip-30d');
     }
 
-    document.getElementById('timezone-select').addEventListener('change', handleTimezoneChange);
-    document.getElementById('custom-timezone-offset').addEventListener('input', () => {
-      if (document.getElementById('timezone-select').value === 'custom') {
-        renderTimeOfDayChart(currentOffsetFromUI());
-      }
-    });
+    initTimezoneControl();
     document.getElementById('model-outcome-view-ratio').addEventListener('click', () => setModelOutcomeView('ratio'));
     document.getElementById('model-outcome-view-count').addEventListener('click', () => setModelOutcomeView('count'));
     initDateRangeControls();

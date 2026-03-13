@@ -436,7 +436,7 @@ def main() -> None:
     parser.add_argument("--meta-dir", required=True, type=Path, help="meta/*.json directory")
     parser.add_argument(
         "--engine",
-        default="hybrid",
+        default="rules_only",
         choices=["hybrid", "rules_only"],
         help="Facet classification engine",
     )

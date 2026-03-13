@@ -138,7 +138,7 @@ def main() -> None:
         help="Incremental state index path (default: <work-dir>/state_index.json)",
     )
     parser.add_argument("--privacy", default="redacted", choices=["redacted", "raw", "none"], help="Privacy mode")
-    parser.add_argument("--engine", default="hybrid", choices=["hybrid", "rules_only"], help="Facet engine")
+    parser.add_argument("--engine", default="rules_only", choices=["hybrid", "rules_only"], help="Facet engine")
     parser.add_argument(
         "--classifier-model",
         default="gpt-5.3-codex-spark",

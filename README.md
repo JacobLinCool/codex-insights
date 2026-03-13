@@ -5,11 +5,13 @@ Generate high-signal Codex usage insights from local Codex data (`state_5.sqlite
 This repository contains a complete skill bundle at `.agents/skills/codex-insights` with:
 
 - extraction (`manifest`, `meta`, `stats`)
-- hybrid facet analysis (`rules + LLM`)
+- rule-based facet analysis (default, optional hybrid `rules + LLM`)
 - narrative synthesis (`LLM, strict JSON contract`)
 - report rendering (`report.html`)
 
 ![Codex Insights Trends](output/playwright/report-trends.png)
+
+Install with `npx -y skills add JacobLinCool/codex-insights`, then run it using `$codex-insights` in Codex CLI or Codex App.
 
 ## What This Skill Produces
 
@@ -53,7 +55,7 @@ python3 .agents/skills/codex-insights/scripts/run_pipeline.py \
   --archived-root ~/.codex/archived_sessions \
   --scope sqlite_threads \
   --privacy redacted \
-  --engine hybrid \
+  --engine rules_only \
   --classifier-model gpt-5.3-codex-spark \
   --narrative-model gpt-5.3-codex
 ```
